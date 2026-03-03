@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  # ── Ollama: LLM Server ───────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama # Cache models (không phải pull lại)
+    restart: unless-stopped
+    # Nếu máy có GPU NVIDIA, bỏ comment 2 dòng dưới:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # ── ChromaDB: Vector Database ────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chromadb-data:/data # ✅ dùng volume cũ của project Airflow
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.token_authn.TokenAuthenticationServerProvider
+      - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_AUTH_TOKEN:-test-token}
+    restart: unless-stopped
+
+  # ── RAG App: Vietnamese News Assistant ───────────────────────
+  rag-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-app
+    ports:
+      - "7860:7860" # Gradio UI
+    environment:
+      - CHROMA_URL=${CHROMA_URL:-http://chromadb:8000}
+      - CHROMA_AUTH_TOKEN=${CHROMA_AUTH_TOKEN:-test-token}
+      - COLLECTION_NAME=${COLLECTION_NAME:-news_articles}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      - LLM_MODEL=${LLM_MODEL:-gemma3:4b}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+    depends_on:
+      - ollama
+      - chromadb
+    restart: unless-stopped
+
+volumes:
+  ollama-models: # Cache Ollama models (~3-4 GB)
+  chromadb-data:
+    external: true # Dùng volume chromadb-data đã có sẵn
+    name: chromadb-data

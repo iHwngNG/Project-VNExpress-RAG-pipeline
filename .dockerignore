@@ -1,0 +1,8 @@
+rag_env/
+chroma_data/
+__pycache__/
+*.pyc
+*.ipynb
+.env
+.env.example
+.git/
