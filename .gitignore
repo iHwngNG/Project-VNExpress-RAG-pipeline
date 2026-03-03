@@ -42,6 +42,7 @@ data/
 !.env.example
 
 # Jupyter Notebook
+*.ipynb
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 

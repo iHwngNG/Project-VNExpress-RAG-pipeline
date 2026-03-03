@@ -20,7 +20,6 @@ Automatically finds relevant articles from the database and answers based on rea
 - [Installation Guide](#-installation-guide)
   - [Option 1: Docker Compose (Recommended)](#option-1-docker-compose-recommended)
   - [Option 2: Run Locally](#option-2-run-locally)
-  - [Option 3: Google Colab](#option-3-google-colab)
 - [Configuration](#-configuration)
 - [RAG Pipeline Details](#-rag-pipeline-details)
 - [GPU Support](#-gpu-support)
@@ -94,9 +93,6 @@ RAG pipeline/
 │   ├── pipeline.py           # Orchestrate the full RAG flow
 │   └── main.py               # 🚀 Entry point — Gradio Chat UI
 │
-├── Notebook
-│   └── main.ipynb            # Notebook (Google Colab) — all-in-one
-│
 └── requirements.txt          # Python dependencies
 ```
 
@@ -110,7 +106,7 @@ RAG pipeline/
 - **RAM** ≥ 8 GB (gemma3:4b needs ~4 GB RAM)
 - **Disk** ≥ 10 GB (model ~3.3 GB + Docker images)
 
-### Local / Colab
+### Local
 - **Python** ≥ 3.10
 - **Ollama** installed and running ([ollama.com](https://ollama.com))
 - **RAM** ≥ 8 GB
@@ -220,21 +216,6 @@ Or edit the `.env` file directly.
 python main.py
 ```
 
----
-
-### Option 3: Google Colab
-
-Open `main.ipynb` on Google Colab and run the cells in order:
-
-1. **Cell 1.1** — Install Python packages
-2. **Cell 1.2** — Install Ollama on Colab
-3. **Cell 1.3** — Start Ollama server
-4. **Cell 1.4** — Pull gemma3:4b model (~3-5 minutes)
-5. **Cells 2-8** — Import, connect DB, define functions
-6. **Cell 9** — Test pipeline (debug mode)
-7. **Cell 10** — Launch Gradio UI (auto-creates a public link)
-
-> **Note:** On Colab, update `CHROMA_URL` in cell 3 to your ChromaDB ngrok URL.
 
 ---
 
@@ -427,4 +408,3 @@ docker-compose up -d --build
 
 - The **Data Pipeline** (separate folder) is responsible for crawling articles and storing them in ChromaDB. The RAG Pipeline only **reads** data from ChromaDB.
 - The first run takes **5-10 minutes** to pull the gemma3:4b model (~3.3 GB). Subsequent runs are fast because the model is cached in the Docker volume `ollama-models`.
-- The `main.ipynb` file is kept for use on Google Colab. The `.py` files are the modularized version of the notebook.
